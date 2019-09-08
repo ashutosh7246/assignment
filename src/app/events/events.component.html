@@ -1,0 +1,61 @@
+
+<div style="margin-bottom: 10px; text-align: right;">
+    <button class="btn btn-success" (click)="addEvent()">Add</button>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>All Day</th>
+            <th>Dates</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Email</th>
+            <th>Location</th>
+            <th>Description</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody *ngIf="!events || !events.length">
+            <tr style="width:100%;vertical-align:top">
+                <td class="table-header lightgray" colspan="10"
+                    style="text-align: center;">
+                    <b>No Events Available</b>
+                </td>
+            </tr>
+        </tbody>
+        <tbody *ngIf="events && events.length">
+            <tr *ngFor="let item of events; let i=index">
+                <td>{{item.title || '-'}}</td>
+                <td>{{item.allDay?'Yes':'No'}}</td>
+                <td>
+                    {{
+                        (item.dateRange && item.dateRange.length && item.dateRange[0] && item.dateRange[1])?
+                        (item.dateRange[0] | date:'shortDate') + ' - ' + (item.dateRange[1] | date:'shortDate'):'-'
+                    }}
+                </td>
+                <td>
+                    {{
+                        (item.allDay)?'NA':(item.startTime | date:'shortTime' || '-')
+                    }}
+                </td>
+                <td>
+                    {{
+                        (item.allDay)?'NA':(item.endTime | date:'shortTime' || '-')
+                    }}
+                </td>
+                <td>{{item.email || '-'}}</td>
+                <td>{{item?.location?.description || '-'}}</td>
+                <td>{{item.description || '-'}}</td>
+                <td style="text-align: center;cursor: pointer;">
+                    <div class="btn-group">
+                        <button class="btn btn-primary" (click)="editEvent(i)">Edit</button>
+                        <button class="btn btn-danger" (click)="removeEvent(i)">Remove</button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,126 @@
+<form>
+  <div class="row">
+    <div class="col col-md-6" [formGroup]="eventForm">
+      <div class="form-group">
+        <label for="eventTitle">Title</label>
+        <input type="text" class="form-control" id="eventTitle" placeholder="Title" [formControl]="eventForm.controls['title']"
+        [ngClass]="{'is-valid': !eventForm.controls['title'].hasError('required') && eventForm.controls['title'].touched,
+        'is-invalid': eventForm.controls['title'].hasError('required') && eventForm.controls['title'].touched}">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-md-12">
+          <label for="endDate">Start Date - End Date</label>
+          <input readonly type="text"
+            class="form-control"
+            formControlName="dateRange"
+            #daterangepicker="bsDaterangepicker"
+            bsDaterangepicker
+            [bsConfig]="{ rangeInputFormat: 'MMMM Do YYYY' }" style="background-color: #ffffff;">
+        </div>
+      </div>
+      <div class="form-row" *ngIf="!eventForm.value['allDay']">
+        <div class="form-group col-md-6">
+            <label for="startTime">Start Time</label>
+            <timepicker id="startTime" formControlName="startTime" [showSpinners]="false" [mousewheel]="allowMouseWheel"
+            [ngClass]="{'is-valid': eventForm.controls['startTime'].valid && eventForm.controls['startTime'].touched,
+            'is-invalid': !eventForm.controls['startTime'].valid && eventForm.controls['startTime'].touched}"></timepicker>
+        </div>
+        <div class="form-group col-md-6">
+            <label for="endTime">End Time</label>
+            <timepicker id="endTime" formControlName="endTime" [showSpinners]="false" [mousewheel]="allowMouseWheel"
+            [ngClass]="{'is-valid': eventForm.controls['endTime'].valid && eventForm.controls['endTime'].touched,
+            'is-invalid': !eventForm.controls['endTime'].valid && eventForm.controls['endTime'].touched}"></timepicker>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="allDay" [formControl]="eventForm.controls['allDay']">
+          <label class="form-check-label" for="allDay">
+            All Day
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="col col-md-6">
+      <div class="row">
+        <div class="col col-md-6" [formGroup]="eventForm">
+          <div class="form-group">
+          <label for="location">Location</label>
+          <ng-select placeholder="Search location"
+            [(ngModel)]="selectedLocation"
+            [ngModelOptions]="{standalone: true}"
+            [items]="locatons"
+            [loading]="locationLoading"
+            bindLabel="description"
+            bindValue="description"
+            [multiple]="false"
+            (search)="onLocationSearch($event)"
+            (clear)="onClear()"
+            (add)="onAdd($event)"
+            (remove)="onRemove($event)"
+            (change)="onChange($event)">
+          </ng-select>
+          <div class="invalid-feedback" *ngIf="!eventForm.controls['location'].valid" style="display: block;">
+            Please select location.
+          </div>
+          </div>        
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" placeholder="Email" [formControl]="eventForm.controls['email']"
+            [ngClass]="{'is-valid': !eventForm.controls['email'].hasError('email') && !eventForm.controls['email'].hasError('required') && eventForm.controls['email'].touched,
+            'is-invalid': (eventForm.controls['email'].hasError('email') || eventForm.controls['email'].hasError('required')) && eventForm.controls['email'].touched}">
+          </div>
+          <div class="form-group">
+              <label for="description">Description</label>
+              <textarea class="form-control" id="description" rows="3" [formControl]="eventForm.controls['description']" 
+              [ngClass]="{'is-valid': !eventForm.controls['description'].hasError('required') && eventForm.controls['description'].touched,
+              'is-invalid': eventForm.controls['description'].hasError('required') && eventForm.controls['description'].touched}">
+              </textarea>
+          </div>
+        </div>
+        <div class="col col-md-6">        
+          <div class="form-group" [formGroup]="guestForm">
+            <label for="guestEmail">Guests</label>
+            <div class="input-group">
+                <input type="guestEmail" class="form-control" id="guestEmail" placeholder="Guest Email" [formControl]="guestForm.controls['email']"
+                [ngClass]="{'is-valid': !guestForm.controls['email'].hasError('email') && !guestForm.controls['email'].hasError('required') && guestForm.controls['email'].touched,
+                'is-invalid': (guestForm.controls['email'].hasError('email') || guestForm.controls['email'].hasError('required')) && guestForm.controls['email'].touched}">
+                <div class="input-group-append">
+                  <div class="input-group-text" style="cursor: pointer;" (click)="addGuest()">+</div>
+                </div>
+            </div>
+          </div>          
+          <div class="table-responsive">
+              <table class="table table-bordered">
+                  <thead>
+                  <tr>
+                      <th>Email</th>
+                      <th>Action</th>
+                  </tr>
+                  </thead>
+                  <tbody *ngIf="!eventForm || !eventForm.value || !eventForm.value['guests'] || !eventForm.value['guests'].length">
+                      <tr style="width:100%;vertical-align:top">
+                          <td class="table-header lightgray" colspan="2"
+                              style="text-align: center;">
+                              <b>No Guest Available</b>
+                          </td>
+                      </tr>
+                  </tbody>
+                  <tbody *ngIf="eventForm && eventForm.value && eventForm.value['guests'] && eventForm.value['guests'].length">
+                      <tr *ngFor="let item of eventForm.value['guests']; let i=index">
+                          <td>{{item.email || '-'}}</td>
+                          <td style="text-align: center;cursor: pointer;" (click)="removeGuest(i)">
+                              <b>Remove</b>
+                          </td>
+                      </tr>
+                  </tbody>
+              </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button *ngIf="!this.eventIndex && this.eventIndex !== 0" (click)="save()" class="btn btn-primary">Add</button>
+  <button *ngIf="this.eventIndex || this.eventIndex === 0" (click)="save()" class="btn btn-primary">Update</button>
+</form>
